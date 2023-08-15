@@ -17,7 +17,7 @@ bwa mem \
   -K 100000000 \
   -Y \
   -R '@RG\tID:PI535232\tLB:sample_16\tPL:ILLUMINA\tPM:NextSeq400\tSM:sample_16' \
-  /work/jlipford/tepary2/Pacutifolius_580_v1.0.fasta \
-  /work/jlipford/tepary2/Pool1_16_R1.fastq \
-  /work/jlipford/tepary2/Pool1_16_R2.fastq \
-  > /work/jlipford/tepary2/aligned_reads.sam   # Output file
+  /genome.fasta \
+  /sequence_R1.fastq \
+  /sequence_R2.fastq \
+  > /aligned_reads.sam   # Output file
