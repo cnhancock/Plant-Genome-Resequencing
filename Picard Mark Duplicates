@@ -1,0 +1,42 @@
+module load picard
+module load R
+module load samtools
+
+#Sort SAM file by coordinate, convert to BAM
+java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar SortSam \
+  INPUT=aligned_reads.sam \
+  OUTPUT=sorted_reads.bam \
+  SORT_ORDER=coordinate \
+  TMP_DIR=./tmp
+
+#Collect Alignment & Insert Size Metrics
+java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar CollectAlignmentSummaryMetrics \
+  R=genome.fasta \
+  I=sorted_reads.bam \
+  O=alignment_metrics.txt \
+  TMP_DIR=./tmp#!/bin/bash
+
+java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar CollectInsertSizeMetrics \
+  INPUT=sorted_reads.bam \
+  OUTPUT=insert_metrics.txt \
+  HISTOGRAM_FILE=insert_size_histogram.pdf \
+  TMP_DIR=./tmp
+
+samtools depth -a sorted_reads.bam > depth_out.txt
+
+#Mark Duplicates
+java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar MarkDuplicates \
+  INPUT=sorted_reads.bam \
+  OUTPUT=dedup_reads.bam \
+  METRICS_FILE=metrics.txt \
+  TMP_DIR=./tmp
+
+#Build BAM Index
+java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar BuildBamIndex \
+  INPUT=dedup_reads.bam \
+  TMP_DIR=./tmp
+
+#Build BAM Index
+java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar BuildBamIndex \
+  INPUT=dedup_reads.bam \
+  TMP_DIR=./tmp
