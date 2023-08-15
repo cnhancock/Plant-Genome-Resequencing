@@ -1,0 +1,53 @@
+module load bcftools
+
+# Start with 6 files:
+#   S1filtered_indels_final.vcf.gz    S1filtered_snps_final.vcf.gz
+#   S2filtered_indels_final.vcf.gz    S2filtered_snps_final.vcf.gz
+#   S3filtered_indels_final.vcf.gz    S3filtered_snps_final.vcf.gz
+
+bcftools index S1filtered_indels_final.vcf.gz
+bcftools index S2filtered_indels_final.vcf.gz
+bcftools index S3filtered_indels_final.vcf.gz
+bcftools index S1filtered_snps_final.vcf.gz
+bcftools index S2filtered_snps_final.vcf.gz
+bcftools index S3filtered_snps_final.vcf.gz
+
+bcftools isec -p IndelsInS1AndS2 S1filtered_indels_final.vcf.gz S2filtered_indels_final.vcf.gz
+bcftools isec -p SnpsInS1AndS2   S1filtered_snps_final.vcf.gz   S2filtered_snps_final.vcf.gz
+
+cp IndelsInS1AndS2/0002.vcf .
+mv 0002.vcf IndelsInS1AndS2.vcf
+cp SnpsInS1AndS2/0002.vcf .
+mv 0002.vcf SnpsInS1AndS2.vcf
+
+bcftools view IndelsInS1AndS2.vcf -Oz -o IndelsInS1AndS2.vcf.gz
+bcftools view SnpsInS1AndS2.vcf   -Oz -o SnpsInS1AndS2.vcf.gz
+
+bcftools index IndelsInS1AndS2.vcf.gz
+bcftools index SnpsInS1AndS2.vcf.gz
+
+# From personal experimentation, it seems that -w1 puts the first file's metainformation in the output file.
+bcftools isec --complement IndelsInS1AndS2.vcf.gz S3filtered_indels_final.vcf.gz \
+  -w1 -Oz -o IndelsInS1AndS2NotInS3.vcf.gz
+bcftools isec --complement S3filtered_indels_final.vcf.gz IndelsInS1AndS2.vcf.gz \
+  -w1 -Oz -o IndelsInS3NotInS1NorS2.vcf.gz
+bcftools isec --complement SnpsInS1AndS2.vcf.gz S3filtered_snps_final.vcf.gz \
+  -w1 -Oz -o SnpsInS1AndS2NotInS3.vcf.gz
+bcftools isec --complement S3filtered_snps_final.vcf.gz SnpsInS1AndS2.vcf.gz \
+  -w1 -Oz -o SnpsInS3NotInS1NorS2.vcf.gz
+
+bcftools index IndelsInS1AndS2NotInS3.vcf.gz
+bcftools index IndelsInS3NotInS1NorS2.vcf.gz
+bcftools index SnpsInS1AndS2NotInS3.vcf.gz
+bcftools index SnpsInS3NotInS1NorS2.vcf.gz
+
+bcftools filter IndelsInS1AndS2NotInS3.vcf.gz --include 'GT="1/1"' -Ov -o IndelsInS1AndS2NotInS3Filtered.vcf
+bcftools filter IndelsInS3NotInS1NorS2.vcf.gz --include 'GT="1/1"' -Ov -o IndelsInS3NotInS1NorS2Filtered.vcf
+bcftools filter SnpsInS1AndS2NotInS3.vcf.gz   --include 'GT="1/1"' -Ov -o SnpsInS1AndS2NotInS3Filtered.vcf
+bcftools filter SnpsInS3NotInS1NorS2.vcf.gz   --include 'GT="1/1"' -Ov -o SnpsInS3NotInS1NorS2Filtered.vcf
+
+mkdir output
+cp IndelsInS1AndS2NotInS3Filtered.vcf output
+cp IndelsInS3NotInS1NorS2Filtered.vcf output
+cp SnpsInS1AndS2NotInS3Filtered.vcf output
+cp SnpsInS3NotInS1NorS2Filtered.vcf output
