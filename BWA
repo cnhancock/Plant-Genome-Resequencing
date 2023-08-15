@@ -1,0 +1,23 @@
+module load bwa
+module load picard
+module load samtools
+
+# Create a BWA index in the genomic reference
+bwa index /genome.fasta
+
+#Generate the fasta file index
+samtools faidx /genome.fasta
+
+#Generate the sequence dictionary
+java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar \
+  CreateSequenceDictionary R=/genome.fasta
+
+#Align the reads in the input file against the genomic reference
+bwa mem \
+  -K 100000000 \
+  -Y \
+  -R '@RG\tID:PI535232\tLB:sample_16\tPL:ILLUMINA\tPM:NextSeq400\tSM:sample_16' \
+  /work/jlipford/tepary2/Pacutifolius_580_v1.0.fasta \
+  /work/jlipford/tepary2/Pool1_16_R1.fastq \
+  /work/jlipford/tepary2/Pool1_16_R2.fastq \
+  > /work/jlipford/tepary2/aligned_reads.sam   # Output file
