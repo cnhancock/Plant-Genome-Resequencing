@@ -1,0 +1,32 @@
+# Add a genome to the configuration file
+vi /media/data/SnpEff/snpEff/snpEff.config
+# Glyma genome, version Gmax275.1
+Gmax275.1.genome : Glyma
+
+# Create database
+java -jar /snpEff.jar build -gff3 -v Gmax275.1
+
+#Run SnpEff
+java -Xmx4g -jar /snpEff.jar -v -stats stats.html Gmax275.1 /snps.vcf > /snps.ann.vcf
+
+java -Xmx4g -jar /snpEff.jar -v -stats stats.html Gmax275.1 /indels.vcf > /indels.ann.vcf
+
+#Case control (has to Run from the snpEff folder)
+java -Xmx1g -jar SnpSift.jar caseControl "++-"  /snps.ann.vcf > /snps.ann.cc.vcf
+
+java -Xmx1g -jar SnpSift.jar caseControl "++-"  /indels.ann.vcf > /indels.ann.cc.vcf
+
+#Filter variants (has to Run from the snpEff folder) - Homozygous variants
+cat /snps.ann.cc.vcf | java -jar SnpSift.jar filter  "(Cases[0] = 2) & (Controls[0] = 0)"  > /snps.hom.vcf
+
+cat /indels.ann.cc.vcf | java -jar SnpSift.jar filter  "(Cases[0] = 2) & (Controls[0] = 0)"  > /indels.hom.vcf
+
+#Filter varients (has to run from the snpEff Folder) -  High and Moderate Only
+cat /snps.ann.cc.vcf | java -jar SnpSift.jar filter  "(Cases[0] = 2) & (Controls[0] = 0) & ((ANN[*].IMPACT = 'HIGH') | (ANN[*].IMPACT = 'MODERATE'))" > /snps.hom.filtered.vcf
+
+cat /indels.ann.cc.vcf | java -jar SnpSift.jar filter  "(Cases[0] = 2) & (Controls[0] = 0) & ((ANN[*].IMPACT = 'HIGH') | (ANN[*].IMPACT = 'MODERATE'))" > /indels.hom.filtered.vcf
+
+#Filter varients (has to run from the snpEff Folder) - Quality score above 30
+java -jar SnpSift.jar filter "QUAL >= 30" /snps.hom.filtered.vcf > /snps.hom.filtered.30.vcf
+
+java -jar SnpSift.jar filter "QUAL >= 30" /indels.hom.filtered.vcf > /indels.hom.filtered.30.vcf
