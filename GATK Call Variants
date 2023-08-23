@@ -1,3 +1,5 @@
+module load GATK
+
 #Call Variants
 gatk HaplotypeCaller -R /genome.fa -I dedup_reads.bam -O raw_variants.vcf 
 
