@@ -35,8 +35,3 @@ java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar MarkDuplicates \
 java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar BuildBamIndex \
   INPUT=dedup_reads.bam \
   TMP_DIR=./tmp
-
-#Build BAM Index
-java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar BuildBamIndex \
-  INPUT=dedup_reads.bam \
-  TMP_DIR=./tmp
