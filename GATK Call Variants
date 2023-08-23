@@ -1,0 +1,20 @@
+#Call Variants
+gatk HaplotypeCaller -R /work/hancoccn/brownseed2/Gmax_275_v2.0.fa -I S3dedup_reads.bam -O S3raw_variants.vcf 
+
+#Extract SNPs and Indels
+gatk SelectVariants -R /work/hancoccn/brownseed2/Gmax_275_v2.0.fa -V S3raw_variants.vcf -select-type SNP -O S3raw_snps.vcf
+
+gatk SelectVariants -R /work/hancoccn/brownseed2/Gmax_275_v2.0.fa -V S3raw_variants.vcf -select-type INDEL -O S3raw_indels.vcf
+
+#Filter SNPs
+gatk VariantFiltration -R /work/hancoccn/brownseed2/Gmax_275_v2.0.fa -V S3raw_snps.vcf -O S3filtered_snps.vcf -filter-name "QD_filter" -filter "QD < 2.0"  -filter-name "FS_filter" -filter "FS > 60.0" -filter-name "MQ_filter" -filter "MQ < 40.0" -filter-name "SOR_filter" -filter "SOR > 4.0" -filter-name "MQRankSum_filter" -filter "MQRankSum < -12.5" -filter-name "ReadPosRankSum_filter" -filter "ReadPosRankSum < -8.0"
+
+#Filter Indels
+gatk VariantFiltration -R /work/hancoccn/brownseed2/Gmax_275_v2.0.fa -V S3raw_indels.vcf -O S3filtered_indels.vcf -filter-name "QD_filter" -filter "QD < 2.0" -filter-name "FS_filter" -filter "FS > 200.0" -filter-name "SOR_filter" -filter "SOR > 10.0"
+
+#Exclude Filtered Variants
+gatk SelectVariants --exclude-filtered -V S3filtered_snps.vcf -O S3bqsr_snps.vcf
+
+gatk SelectVariants --exclude-filtered -V S3filtered_indels.vcf -O S3bqsr_indels.vcf
+
+
