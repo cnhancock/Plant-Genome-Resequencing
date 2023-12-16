@@ -21,12 +21,12 @@ cat /snps.ann.cc.vcf | java -jar SnpSift.jar filter  "(Cases[0] = 2) & (Controls
 
 cat /indels.ann.cc.vcf | java -jar SnpSift.jar filter  "(Cases[0] = 2) & (Controls[0] = 0)"  > /indels.hom.vcf
 
-#Filter varients (has to run from the snpEff Folder) -  High and Moderate Only
+#Filter variants (has to run from the snpEff Folder) -  High and Moderate Only
 cat /snps.ann.cc.vcf | java -jar SnpSift.jar filter  "(Cases[0] = 2) & (Controls[0] = 0) & ((ANN[*].IMPACT = 'HIGH') | (ANN[*].IMPACT = 'MODERATE'))" > /snps.hom.filtered.vcf
 
 cat /indels.ann.cc.vcf | java -jar SnpSift.jar filter  "(Cases[0] = 2) & (Controls[0] = 0) & ((ANN[*].IMPACT = 'HIGH') | (ANN[*].IMPACT = 'MODERATE'))" > /indels.hom.filtered.vcf
 
-#Filter varients (has to run from the snpEff Folder) - Quality score above 30
+#Filter variants (has to run from the snpEff Folder) - Quality score above 30
 java -jar SnpSift.jar filter "QUAL >= 30" /snps.hom.filtered.vcf > /snps.hom.filtered.30.vcf
 
 java -jar SnpSift.jar filter "QUAL >= 30" /indels.hom.filtered.vcf > /indels.hom.filtered.30.vcf
