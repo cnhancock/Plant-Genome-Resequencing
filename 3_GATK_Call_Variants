@@ -1,5 +1,10 @@
 module load GATK
 
+#create sequence dictionary
+gatk CreateSequenceDictionary \
+    -R /genome \
+    -O genome.dict
+
 #Call Variants
 gatk HaplotypeCaller -R /genome.fa -I dedup_reads.bam -O raw_variants.vcf 
 
