@@ -1,0 +1,50 @@
+#code has dependencies on pandas and openpyxl modules, which will need to be installed in order to run
+
+import pandas as pd  #pandas uses openpyxl under the hood to read .xlsx data structures
+import re  #used for regex searching in order to isolate glyma IDs
+from pathlib import Path  #
+
+##create a list of all glyma ids withing the LOF list provided
+lof_list = []
+lof_file = '/Path/to/pbi_soybean_data.xlsx'  #replace with location of lof xlsx file
+xl_full = pd.read_excel(lof_file, sheet_name=3, engine='openpyxl', skiprows=2)  #based on the formatted location of glyma ids.
+pd.set_option('display.max_columns', None)  #included for troubleshooting purposes only.
+glyma_ids = xl_full["Gene ID"]  #based on field name of column that has glyma ids
+for gene in glyma_ids:
+    lof_list.append(gene)  #this adds all of the ids into the lof_list, to be compared against when filtering
+
+##create the filter
+def filter_output(file1):
+    output = ""  #define variable to write output to
+    filtered = []
+    totals = 0  #define the total number of mutations seen
+    with open(file1 , 'r') as infile:
+        for mutt in infile:
+            if mutt.startswith('#'):  #add header information to the output first
+                output += mutt  #append line to output
+            else:  #all other lines should be the mutation information
+                totals += 1  #increment total number of mutations seen
+                glyma = re.search(r'Glyma\.\d{2}G\d{6}', mutt)  #uses regex to match the first instance of a glyma number
+                if glyma.group() in lof_list: # checks to see if glyma id exists in the loss of function list
+                    filtered.append(glyma.group())  #adds the filtered out glyma id to a list, for counting purposes
+                else:
+                    output += mutt  #adds non filtered lines to the output, thus recreating the original file, minus any filtered lines
+    print(f'complete. \nfiltered number:{len(filtered)} out of {totals} results filtered out')  #prints filtered results
+    return output  #returns the output, to be passed as data to be written in an output file
+def write_outfile(file2, data):
+    newfile = Path(file2).with_name("LOFfiltered_" + Path(file2).name)  #generates a new file name to write the output to, in the same folder as the input
+    with open(newfile, 'w') as ofile:
+        ofile.write(data)  #writes the data to the file.
+
+
+## define the vcf files to be filtered
+f1 = '/Path/to/dwarf_indels_filtered.ann.high.vcf'
+f2 = '/Path/to/dwarf_snps_filtered.ann.high.vcf'
+
+## run the filtering functions with the files, then passes the filtered results to file writing function
+write_outfile(f1, filter_output(f1))  #calls the write_outfile function, passing the filepath and filtered data as parameters
+write_outfile(f2, filter_output(f2))
+
+##left in in case script is converted to be a called command. for now it is functionless.
+if __name__ == '__main__':
+    pass
