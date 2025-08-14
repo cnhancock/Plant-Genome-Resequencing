@@ -1,6 +1,18 @@
+#!/bin/sh
+#SBATCH --job-name=pmd
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=nathanh@usca.edu
+#SBATCH --output /work/%u/jobs/pmd.%j.out
+#SBATCH --error /work/%u/jobs/pmd.%j.err
+#SBATCH -N 1
+#SBATCH -n 24
+#SBATCH -p hancock-lab
+
 module load picard
 module load R
 module load samtools
+
+mkdir -p ./tmp
 
 #Sort SAM file by coordinate, convert to BAM
 java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar SortSam \
@@ -14,7 +26,7 @@ java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar CollectAlignmentSummaryMet
   R=genome.fasta \
   I=sorted_reads.bam \
   O=alignment_metrics.txt \
-  TMP_DIR=./tmp#!/bin/bash
+  TMP_DIR=./tmp
 
 java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar CollectInsertSizeMetrics \
   INPUT=sorted_reads.bam \
