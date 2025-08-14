@@ -1,3 +1,4 @@
+#written by Garrison Hoke
 #code has dependencies on pandas and openpyxl modules, which will need to be installed in order to run
 
 import pandas as pd  #pandas uses openpyxl under the hood to read .xlsx data structures
