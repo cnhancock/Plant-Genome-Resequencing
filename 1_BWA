@@ -1,3 +1,13 @@
+#!/bin/bash
+#SBATCH --job-name=bwa
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=nathanh@usca.edu
+#SBATCH --output /work/%u/jobs/bwa_%j.out
+#SBATCH --error /work/%u/jobs/bwa_.%j.err
+#SBATCH -N 1
+#SBATCH -n 24
+#SBATCH -p hancock-lab
+
 module load bwa
 module load picard
 module load samtools
@@ -14,6 +24,7 @@ java -jar /share/apps/gcc/4.8.5/picard2018/picard.jar \
 
 #Align the reads in the input file against the genomic reference
 bwa mem \
+  -t 24 \
   -K 100000000 \
   -Y \
   -R '@RG\tID:PI535232\tLB:sample_16\tPL:ILLUMINA\tPM:NextSeq400\tSM:sample_16' \
